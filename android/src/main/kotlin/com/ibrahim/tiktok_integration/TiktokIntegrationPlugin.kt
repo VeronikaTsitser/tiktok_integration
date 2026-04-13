@@ -26,7 +26,20 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
     when (call.method) {
       "initializeSdk" -> initializeSdk(call, result)
       "trackEvent" -> trackEvent(call, result)
+      "isSdkDebugMode" -> isSdkDebugMode(result)
+      "getSdkTestEventCode" -> getSdkTestEventCode(result)
       else -> result.notImplemented()
+    }
+  }
+
+  private fun parseLogLevel(level: String?): TikTokBusinessSdk.LogLevel? {
+    if (level == null) return null
+    return when (level.lowercase()) {
+      "none" -> TikTokBusinessSdk.LogLevel.NONE
+      "info" -> TikTokBusinessSdk.LogLevel.INFO
+      "warn" -> TikTokBusinessSdk.LogLevel.WARN
+      "debug" -> TikTokBusinessSdk.LogLevel.DEBUG
+      else -> null
     }
   }
 
@@ -34,9 +47,20 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
     val appId = call.argument<String>("appId")
     val ttAppId = call.argument<String>("ttAppId")
     if (appId != null && ttAppId != null) {
+      val debugMode = call.argument<Boolean>("debugMode") ?: false
+      val logLevelArg = parseLogLevel(call.argument<String>("logLevel"))
       val ttConfig = TikTokBusinessSdk.TTConfig(context)
         .setAppId(appId)
         .setTTAppId(ttAppId)
+
+      if (debugMode) {
+        ttConfig.openDebugMode()
+      }
+      val effectiveLogLevel = logLevelArg
+        ?: if (debugMode) TikTokBusinessSdk.LogLevel.DEBUG else null
+      if (effectiveLogLevel != null) {
+        ttConfig.setLogLevel(effectiveLogLevel)
+      }
 
       TikTokBusinessSdk.initializeSdk(ttConfig)
       result.success("TikTok SDK initialized successfully")
@@ -66,6 +90,14 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
     } else {
       result.error("INVALID_ARGUMENT", "Event name is required", null)
     }
+  }
+
+  private fun isSdkDebugMode(result: Result) {
+    result.success(TikTokBusinessSdk.isInSdkDebugMode())
+  }
+
+  private fun getSdkTestEventCode(result: Result) {
+    result.success(TikTokBusinessSdk.getTestEventCode())
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
