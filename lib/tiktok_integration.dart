@@ -34,6 +34,7 @@ class TiktokIntegration {
   static Future<void> initializeSdk(
     String appId,
     String ttAppId, {
+    required String appSecret,
     bool debugMode = false,
     TikTokSdkLogLevel? logLevel,
   }) async {
@@ -41,6 +42,7 @@ class TiktokIntegration {
       final args = <String, dynamic>{
         'appId': appId,
         'ttAppId': ttAppId,
+        'appSecret': appSecret,
         'debugMode': debugMode,
       };
       if (logLevel != null) {

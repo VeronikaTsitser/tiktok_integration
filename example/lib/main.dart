@@ -26,8 +26,9 @@ class _MyAppState extends State<MyApp> {
       // Replace these with your actual app IDs.
       const String appId = 'YOUR_APP_ID';
       const String ttAppId = 'YOUR_TIKTOK_APP_ID';
+      const String appSecret = 'YOUR_APP_SECRET';
 
-      await TiktokIntegration.initializeSdk(appId, ttAppId);
+      await TiktokIntegration.initializeSdk(appId, ttAppId, appSecret: appSecret);
       debugPrint("TikTok SDK initialized successfully.");
 
       // Track an example event after initialization.

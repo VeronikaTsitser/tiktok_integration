@@ -46,10 +46,11 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
   private fun initializeSdk(call: MethodCall, result: Result) {
     val appId = call.argument<String>("appId")
     val ttAppId = call.argument<String>("ttAppId")
-    if (appId != null && ttAppId != null) {
+    val appSecret = call.argument<String>("appSecret")
+    if (appId != null && ttAppId != null && appSecret != null) {
       val debugMode = call.argument<Boolean>("debugMode") ?: false
       val logLevelArg = parseLogLevel(call.argument<String>("logLevel"))
-      val ttConfig = TikTokBusinessSdk.TTConfig(context)
+      val ttConfig = TikTokBusinessSdk.TTConfig(context, appSecret)
         .setAppId(appId)
         .setTTAppId(ttAppId)
 
