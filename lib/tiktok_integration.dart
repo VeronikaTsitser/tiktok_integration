@@ -24,9 +24,9 @@ String _logLevelChannelName(TikTokSdkLogLevel level) {
 class TiktokIntegration {
   static const MethodChannel _channel = MethodChannel('tiktok_integration');
 
-  /// Initializes the TikTok SDK with [appId] and [ttAppId].
+  /// Initializes the TikTok SDK with [appId], [ttAppId] and [appSecret].
   ///
-  /// [debugMode] enables the SDK debug / test-events mode (`TTConfig.openDebugMode()`).
+  /// [debugMode] enables the SDK debug / test-event2s mode (`TTConfig.openDebugMode()`).
   /// [logLevel] sets native log verbosity; if omitted and [debugMode] is `true`,
   /// [TikTokSdkLogLevel.debug] is applied by default on Android.
   ///
@@ -73,6 +73,42 @@ class TiktokIntegration {
     } on PlatformException catch (e) {
       print("Error reading TikTok SDK test event code: ${e.message}");
       return '';
+    }
+  }
+
+  /// Binds the current app session to a user in TikTok Events Manager.
+  ///
+  /// Вызывайте при входе, регистрации, обновлении профиля (при смене аккаунта —
+  /// сначала [logout], затем [identify]), при восстановлении сохранённой сессии.
+  static Future<void> identify(
+    String externalId, {
+    String? externalUserName,
+    String? phoneNumber,
+    String? email,
+  }) async {
+    try {
+      final args = <String, dynamic>{'externalId': externalId};
+      if (externalUserName != null) {
+        args['externalUserName'] = externalUserName;
+      }
+      if (phoneNumber != null) {
+        args['phoneNumber'] = phoneNumber;
+      }
+      if (email != null) {
+        args['email'] = email;
+      }
+      await _channel.invokeMethod('identify', args);
+    } on PlatformException catch (e) {
+      print("Error identifying TikTok user: ${e.message}");
+    }
+  }
+
+  /// Сбрасывает привязку пользователя (выход, смена аккаунта). Затем вызовите [identify].
+  static Future<void> logout() async {
+    try {
+      await _channel.invokeMethod('logout');
+    } on PlatformException catch (e) {
+      print("Error TikTok SDK logout: ${e.message}");
     }
   }
 

@@ -25,6 +25,8 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "initializeSdk" -> initializeSdk(call, result)
+      "identify" -> identify(call, result)
+      "logout" -> logout(result)
       "trackEvent" -> trackEvent(call, result)
       "isSdkDebugMode" -> isSdkDebugMode(result)
       "getSdkTestEventCode" -> getSdkTestEventCode(result)
@@ -68,6 +70,24 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
     } else {
       result.error("INVALID_ARGUMENT", "App ID and TT App ID are required", null)
     }
+  }
+
+  private fun identify(call: MethodCall, result: Result) {
+    val externalId = call.argument<String>("externalId")
+    if (externalId.isNullOrBlank()) {
+      result.error("INVALID_ARGUMENT", "externalId is required", null)
+      return
+    }
+    val externalUserName = call.argument<String>("externalUserName")
+    val phoneNumber = call.argument<String>("phoneNumber")
+    val email = call.argument<String>("email")
+    TikTokBusinessSdk.identify(externalId, externalUserName, phoneNumber, email)
+    result.success("User identified successfully")
+  }
+
+  private fun logout(result: Result) {
+    TikTokBusinessSdk.logout()
+    result.success("User logged out successfully")
   }
 
   private fun trackEvent(call: MethodCall, result: Result) {
