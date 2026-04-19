@@ -78,11 +78,15 @@ class TiktokIntegrationPlugin: FlutterPlugin, MethodCallHandler {
       result.error("INVALID_ARGUMENT", "externalId is required", null)
       return
     }
-    val externalUserName = call.argument<String>("externalUserName")
-    val phoneNumber = call.argument<String>("phoneNumber")
-    val email = call.argument<String>("email")
-    TikTokBusinessSdk.identify(externalId, externalUserName, phoneNumber, email)
-    result.success("User identified successfully")
+    val externalUserName = call.argument<String>("externalUserName")?.takeIf { it.isNotBlank() } ?: ""
+    val phoneNumber = call.argument<String>("phoneNumber")?.takeIf { it.isNotBlank() } ?: ""
+    val email = call.argument<String>("email")?.takeIf { it.isNotBlank() } ?: ""
+    try {
+      TikTokBusinessSdk.identify(externalId, externalUserName, phoneNumber, email)
+      result.success("User identified successfully")
+    } catch (e: Exception) {
+      result.error("IDENTIFY_FAILED", e.message, null)
+    }
   }
 
   private fun logout(result: Result) {
